@@ -1,0 +1,56 @@
+#define POWER_PIN 7
+#define SIGNAL_PIN A5
+#define THRESHOLD 250
+int value = 0;
+int sensorPin = A0;  //gas sensor
+float sensorValue;
+#include <Servo.h>
+Servo myservo;
+Servo myservoo;
+int pos = 0;
+
+void setup() {
+
+  Serial.begin(9600);
+  pinMode(POWER_PIN, OUTPUT);
+  digitalWrite(POWER_PIN, LOW);
+  pinMode(sensorPin, INPUT);
+  myservo.attach(9);
+  myservoo.attach(6);
+}
+
+void loop() {
+
+  digitalWrite(POWER_PIN, HIGH);   // turn the sensor ON
+  delay(10);                       // wait 10 milliseconds
+  value = analogRead(SIGNAL_PIN);  // read the analog value from sensor
+  digitalWrite(POWER_PIN, LOW);    // turn the sensor OFF
+  Serial.print("Sensor value: ");
+  Serial.println(value);
+
+  if (value > THRESHOLD) {
+    Serial.print("The water is detected");
+    for (pos = 0; pos <= 180; pos += 1) {  // goes from 0 degrees to 180 degrees
+      // in steps of 1 degree
+      myservo.write(pos);  // tell servo to go to position in variable 'pos'
+                           // waits 15ms for the servo to reach the position
+    }
+  } else {
+    Serial.print("The water is not detected");
+    for (pos = 180; pos >= 0; pos -= 1) {  // goes from 180 degrees to 0 degrees
+      myservo.write(pos);                  // tell servo to go to position in variable 'pos'
+    }
+    sensorValue = analogRead(sensorPin);
+    Serial.println(sensorValue);
+    if (sensorValue > 100) {
+      for (pos = 0; pos <= 180; pos += 1) {  // goes from 0 degrees to 180 degrees
+        // in steps of 1 degree
+        myservoo.write(pos);  // tell servo to go to position in variable 'pos'
+      }
+    } else {
+      for (pos = 180; pos >= 0; pos -= 1) {  // goes from 180 degrees to 0 degrees
+        myservoo.write(pos);                 // tell servo to go to position in variable 'pos'
+      }
+    }
+  }
+}
